@@ -2,12 +2,13 @@
     description = "Min probability code challenge";
     inputs = {
         nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+        flake-utils.url = "github:numtide/flake-utils";
     };
-    outputs = { self, nixpkgs }:
-    let pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    outputs = { self, nixpkgs, flake-utils }:
+    let pkgs = nixpkgs.legacyPackages.x86_64-darwin;
     in
     {
-      devShell.x86_64-linux = pkgs.mkShell {
+      devShell.x86_64-darwin = pkgs.mkShell {
         buildInputs =
           [
             pkgs.openjdk11
