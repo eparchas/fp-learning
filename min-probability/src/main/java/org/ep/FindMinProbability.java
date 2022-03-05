@@ -3,20 +3,22 @@ package org.ep;
 import java.io.File;
 import java.math.BigDecimal;
 
+import org.ep.helper.Util;
 import org.ep.model.Room;
 import org.ep.parser.RoomParser;
 
+import io.vavr.Predicates;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 public class FindMinProbability {
     public static void main(String[] args) {
         extractFileNameFromArgs(args)
-                .map(FindMinProbability::toFile).flatMap(Option::toTry)
+                .map(FindMinProbability::toValidFile).flatMap(Option::toTry)
                 .flatMap(RoomParser::parseRoom)
                 .map(FindMinProbability::traverse)
-                .map(FindMinProbability::round)
-                .andThen(prob -> System.out.println(prob))
+                .map(Util::round)
+                .andThen(prob -> System.out.println(prob)) // method reference didn't work here
                 .onFailure((_ex) -> {
                     System.err.println(_ex.getMessage());
                     System.exit(-1);
@@ -33,21 +35,16 @@ public class FindMinProbability {
         });
     }
 
-    private static Option<File> toFile(String fileName) {
-        if (fileName != null && !fileName.isEmpty()) {
-            final File file = new File(fileName);
-            if (file.exists() && file.canRead() && !file.isHidden()) {
-                return Option.of(file);
-            }
-        }
-        return Option.none();
+    private static Option<File> toValidFile(String fileName) {
+        return Option.of(fileName)
+                .filter(Predicates.not(String::isBlank))
+                .map(File::new)
+                .filter(File::exists)
+                .filter(File::canRead)
+                .filter(Predicates.not(File::isHidden));
     }
 
     public static BigDecimal traverse(Room room) {
         return BigDecimal.ONE;
-    }
-
-    private static BigDecimal round(BigDecimal toRound) {
-        return BigDecimal.ZERO;
     }
 }
