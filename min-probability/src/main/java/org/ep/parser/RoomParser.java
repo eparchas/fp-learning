@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.ep.model.Detector;
 import org.ep.model.Room;
 import io.vavr.control.Try;
+import io.vavr.control.Validation;
 
 import org.javafp.data.IList;
 import org.javafp.parsecj.*;
