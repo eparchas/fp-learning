@@ -42,11 +42,8 @@ public class RoomParserTest {
 
     @Test
     void validZeroDetectors() {
-        final Input<Character> roomDescription = Input.of("25.0\n" +
-                "0\n");
-
         List.of(Input.of("25.0\n" + "0\n"), Input.of("25.0\n" + "0"))
-                .forEach(input -> {
+                .forEach(roomDescription -> {
                     final Try<Room> tryRoom = RoomParser.parseRoom(roomDescription);
                     Room room = tryRoom.get();
                     assertNotNull(room);
@@ -127,4 +124,11 @@ public class RoomParserTest {
         assertTrue(tryRoom.isFailure());
     }
 
+    @Test
+    void emptyInput() {
+        final Input<Character> roomDescription = Input.of("");
+
+        final Try<Room> tryRoom = RoomParser.parseRoom(roomDescription);
+        assertTrue(tryRoom.isFailure());
+    }
 }

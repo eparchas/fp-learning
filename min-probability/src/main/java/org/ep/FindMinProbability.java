@@ -1,22 +1,18 @@
 package org.ep;
 
-import java.io.File;
-import java.math.BigDecimal;
-
 import org.ep.helper.Util;
-import org.ep.model.Room;
 import org.ep.parser.RoomParser;
+import org.ep.traverse.TraverseRoom;
 
-import io.vavr.Predicates;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 public class FindMinProbability {
     public static void main(String[] args) {
         extractFileNameFromArgs(args)
-                .map(FindMinProbability::toValidFile).flatMap(Option::toTry)
+                .map(Util::toValidFile).flatMap(Option::toTry)
                 .flatMap(RoomParser::parseRoom)
-                .map(FindMinProbability::traverse)
+                .map(TraverseRoom::traverseUndetected)
                 .map(Util::round)
                 .andThen(prob -> System.out.println(prob)) // method reference didn't work here
                 .onFailure((_ex) -> {
@@ -33,18 +29,5 @@ public class FindMinProbability {
                 throw new RuntimeException("Invalid file name");
             return args[0];
         });
-    }
-
-    private static Option<File> toValidFile(String fileName) {
-        return Option.of(fileName)
-                .filter(Predicates.not(String::isBlank))
-                .map(File::new)
-                .filter(File::exists)
-                .filter(File::canRead)
-                .filter(Predicates.not(File::isHidden));
-    }
-
-    public static BigDecimal traverse(Room room) {
-        return BigDecimal.ONE;
     }
 }
