@@ -6,4 +6,5 @@ public interface Grid {
     int size();
 
     List<Point> adjacents(Point p);
+    
 }

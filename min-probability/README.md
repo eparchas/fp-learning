@@ -7,7 +7,7 @@ Write a program that, given the description of the room, including your starting
 ## Detectors:
 For any object at distance D from the detector, the probability of detection per meter is given by:
 ```
-exp(-π*D/L)^2)
+exp(-(π*D/L)^2)
 ```
 where L is the width of the room (see below) and `x^2` is the square of x.
 

@@ -1,5 +1,15 @@
 package org.ep.parser;
 
+import static org.javafp.parsecj.Combinators.count;
+import static org.javafp.parsecj.Combinators.eof;
+import static org.javafp.parsecj.Combinators.fail;
+import static org.javafp.parsecj.Combinators.or;
+import static org.javafp.parsecj.Combinators.retn;
+import static org.javafp.parsecj.Text.dble;
+import static org.javafp.parsecj.Text.intr;
+import static org.javafp.parsecj.Text.space;
+import static org.javafp.parsecj.Text.string;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
@@ -7,15 +17,11 @@ import java.util.stream.Collectors;
 
 import org.ep.model.Detector;
 import org.ep.model.Room;
-import io.vavr.control.Try;
-import io.vavr.control.Validation;
-
 import org.javafp.data.IList;
-import org.javafp.parsecj.*;
+import org.javafp.parsecj.Parser;
 import org.javafp.parsecj.input.Input;
 
-import static org.javafp.parsecj.Combinators.*;
-import static org.javafp.parsecj.Text.*;
+import io.vavr.control.Try;
 
 public abstract class RoomParser {
     public static final Parser<Character, String> EOL = string(System.lineSeparator());

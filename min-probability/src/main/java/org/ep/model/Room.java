@@ -52,4 +52,13 @@ public class Room {
         return Objects.hash(length, detectors);
     }
 
+
+    @Override
+    public String toString() {
+        return "{" +
+            " length='" + getLength() + "'" +
+            ", detectors='" + getDetectors() + "'" +
+            "}";
+    }
+
 }

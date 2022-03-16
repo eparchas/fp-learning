@@ -20,6 +20,11 @@
             <version>0.10.4</version>
         </dependency>
         <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr-match</artifactId>
+            <version>0.10.4</version>
+        </dependency>
+        <dependency>
             <groupId>org.javafp</groupId>
             <artifactId>parsecj</artifactId>
             <version>0.6</version>
