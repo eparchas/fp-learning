@@ -1,6 +1,8 @@
 package org.ep.traverse;
 
-import static org.ep.helper.Util.*;
+import static org.ep.helper.Util.ROUNDING_MODE;
+import static org.ep.helper.Util.SCALE;
+import static org.ep.helper.Util.newBD;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -62,7 +64,7 @@ public abstract class TraverseRoom {
      */
     public static BigDecimal traverseMinProbability(Grid grid, Function1<Point, BigDecimal> probability, Point start,
             Point end) {
-        Stream<Tuple2<Point, BigDecimal>> points = StreamState.init(start, grid::adjacents, probability).unfold();
+        Stream<Tuple2<Point, BigDecimal>> points = TraversalState.init(start, grid::adjacents, probability).unfold();
         return points
                 .filter(t -> t._1().equals(end))
                 .headOption()

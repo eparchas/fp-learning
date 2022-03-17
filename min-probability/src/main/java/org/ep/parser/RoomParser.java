@@ -23,6 +23,9 @@ import org.javafp.parsecj.input.Input;
 
 import io.vavr.control.Try;
 
+/**
+ * Provides methods to parse a room file to a room
+ */
 public abstract class RoomParser {
     public static final Parser<Character, String> EOL = string(System.lineSeparator());
 
@@ -31,7 +34,7 @@ public abstract class RoomParser {
     }
 
     /**
-     * This is dangerous as it loads all the file in memory. Should provide an
+     * TODO: This is dangerous as it loads all the file in memory. Should provide an
      * alternative implementation
      * of Input that buffers internally and starts again in case the parser needs to
      * backtrack.

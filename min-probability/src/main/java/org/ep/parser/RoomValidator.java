@@ -11,6 +11,9 @@ import io.vavr.collection.List;
 import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
 
+/**
+ * Provides methods to validate a Room
+ */
 public abstract class RoomValidator {
     public static final String ROOM_LENGTH_ERROR = "Room length must be positive";
     public static final String DETECTOR_PLACEMENT_ERROR = "Detector should be placed within the room";
