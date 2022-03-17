@@ -2,22 +2,22 @@
 
 You need to go through a room with a number of detectors, whose efficacy of detecting a moving object is a function of the distance of that object with the detector. Your goal is to find, with the highest precision possible, the path across the room with the lowest probability of detection.
 
-Write a program that, given the description of the room, including your starting position and the ending position, produces a single floating point number as output. This floating point number represents the lowest probability of detection achievable given the number and location fo the detectors, rounded to the 3rd decimal digit.
+Write a program that, given the description of the room, including your starting position and the ending position, produces a single floating point number as output. This floating point number represents the lowest probability of detection achievable given the number and location of the detectors, rounded to the 3rd decimal digit.
 
 ## Detectors:
 For any object at distance D from the detector, the probability of detection per meter is given by:
 ```
 exp(-(π*D/L)^2)
 ```
-where L is the width of the room (see below) and `x^2` is the square of x.
+where `L` is the width of the room (see below) and `x^2` is the square of `x`.
 
 # Input
 
-The main input to the program is a *.map file, which has the following format:
+The main input to the program is a `*.map` file, which has the following format:
 
 The first line is a single floating point number L, representing the length of the room, which is assumed to always be a square.
-The second line is a single integer N, giving the number of detectors in the room.
-All following lines in the file are coordinates, i.e. pairs of floating point numbers, separated by a space character. The number of coordinates in the file is given by N.
+The second line is a single integer `N`, giving the number of detectors in the room.
+All following lines in the file are coordinates, i.e. pairs of floating point numbers, separated by a space character. The number of coordinates in the file is given by `N`.
 The coordinate system is x, y based, with the origin located in the bottom left corner of the room. Coordinates never include negative numbers.
 
 Starting position is assumed to be always the exactly midway accross the bottom edge of the room.
