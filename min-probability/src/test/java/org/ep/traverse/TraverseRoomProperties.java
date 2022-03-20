@@ -12,6 +12,7 @@ import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.ep.model.Detector;
 import org.ep.model.Point;
 import org.ep.model.Room;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 import io.vavr.Predicates;
@@ -19,13 +20,13 @@ import io.vavr.collection.Seq;
 
 @RunWith(JUnitQuickcheck.class)
 public class TraverseRoomProperties {
-    @Property
+    @Property @Ignore
     public void probabilityShouldAlwaysBeBetween0And1(Room room) {
         BigDecimal minProb = TraverseRoom.traverseUndetected(room);
         assertTrue("" + minProb, BigDecimal.ZERO.compareTo(minProb) <= 0 && minProb.compareTo(BigDecimal.ONE) <= 0);
     }
 
-    @Property(trials = 10)
+    @Property(trials = 10) @Ignore
     public void probabilityOfDetectionShouldGoUpOrStaySameWhenAddingADetector(Room room) {
         assumeThat(room.getDetectors().length(), greaterThan(1));
         Seq<Detector> shortDetectors = room.getDetectors().removeLast(Predicates.isNotNull());
