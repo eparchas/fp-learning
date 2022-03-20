@@ -19,7 +19,7 @@ import io.vavr.collection.Seq;
 
 @RunWith(JUnitQuickcheck.class)
 public class TraverseRoomProperties {
-    @Property(shrink = true)
+    @Property
     public void probabilityShouldAlwaysBeBetween0And1(Room room) {
         BigDecimal minProb = TraverseRoom.traverseUndetected(room);
         assertTrue("" + minProb, BigDecimal.ZERO.compareTo(minProb) <= 0 && minProb.compareTo(BigDecimal.ONE) <= 0);
@@ -34,7 +34,7 @@ public class TraverseRoomProperties {
         assertTrue(minProb + " <= " + augmentedMinProb, minProb.compareTo(augmentedMinProb) <= 0);
     }
 
-    @Property(shrink = true)
+    @Property
     public void probabilityForEachPointShouldBeBetween0And1(Room room, Point point) {
         BigDecimal pointProbability = TraverseRoom.allDetectorsProbability(room.getLength(), room.getDetectors(), point);
         assertTrue("" + pointProbability, BigDecimal.ZERO.compareTo(pointProbability) <= 0 && pointProbability.compareTo(BigDecimal.ONE) <= 0);

@@ -27,7 +27,7 @@ public class FindMinProbability {
     private static Try<String> extractFileNameFromArgs(String[] args) {
         return Try.of(() -> {
             if (args.length != 1)
-                throw new RuntimeException("Invalid number of arguments");
+                throw new RuntimeException("Usage: calculate [map_file_name]");
             if (args[0].isEmpty())
                 throw new RuntimeException("Invalid file name");
             return args[0];
