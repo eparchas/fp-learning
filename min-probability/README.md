@@ -48,3 +48,26 @@ $ calculate room.map
 
 The program should return exit status 0 if the hypothetical room.map file was parsed successfully. Returns exit status 1 otherwise.
 
+# Running instructions
+Make sure you have Nix or NixOS installed
+```
+curl -L https://nixos.org/nix/install | sh
+```
+
+Add support for Nix Flakes or update your existing nix config accordingly.
+```
+echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
+```
+
+Run the following to enter the appropriate shell
+```
+nix develop
+```
+
+In the resulting shell you can build and run the code
+```
+> mvn clean install
+[...]
+> ./calculate sample.map
+0.736
+```
