@@ -10,3 +10,16 @@ Ghost is a two-person word game where players alternate appending letters to a w
 Given a dictionary of words, determine the letters the first player should start with, such that with optimal play they cannot lose.
 
 For example, if the dictionary is `["cat", "calf", "dog", "bear"]`, the only winning start letter would be `b`.
+
+# Parsing
+We can assume that the dictionary of words is provided as a command line argument in a file where every line contains a word.
+
+```
+cat
+calf
+dog
+bear
+```
+
+# Notes
+Whether player A will be able to win depends largely on the dictionary provided. It is quite possible that no words exist to ensure that player A can win. Also, it is possible that a player can win in multiple ways, as it is possible to require more than one starting letters to ensure that he can win. For this reason, the return type of the `calculateFirstLetters` function is a List of Strings. Each string contains only the letters that player A will need to play in order to win, however this can be easily changed to return the play of both players so far.
