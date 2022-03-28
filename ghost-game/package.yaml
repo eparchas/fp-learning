@@ -24,6 +24,8 @@ dependencies:
 - bytestring-trie
 - bytestring
 - hspec
+- hspec-contrib
+- QuickCheck
 - containers
 
 library:
