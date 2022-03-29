@@ -20,7 +20,8 @@ import io.vavr.collection.Seq;
 import io.vavr.collection.Stream;
 
 /**
- * Provides methods to allow traversal of a room with minimum probability of detection
+ * Provides methods to allow traversal of a room with minimum probability of
+ * detection
  */
 public abstract class TraverseRoom {
     private TraverseRoom() {
@@ -29,6 +30,7 @@ public abstract class TraverseRoom {
 
     /**
      * Traverse the room keeping the probability of detection at a minimum
+     * 
      * @param room to traverse
      * @return the minimum probability of detection for that room
      */
@@ -46,11 +48,14 @@ public abstract class TraverseRoom {
     }
 
     /**
-     * Traverse the room from start to end, keeping the probability of detection at a minimum
-     * @param room to traverse
+     * Traverse the room from start to end, keeping the probability of detection at
+     * a minimum
+     * 
+     * @param room  to traverse
      * @param start starting point
-     * @param end ending point
-     * @return the minimum probability of detection if traversing the room from start to end
+     * @param end   ending point
+     * @return the minimum probability of detection if traversing the room from
+     *         start to end
      */
     public static BigDecimal traverseUndetected(Room room, Point start, Point end) {
         return traverseUndetected(room, start, end, TraverseRoom::formGrid);
@@ -65,16 +70,19 @@ public abstract class TraverseRoom {
 
     /**
      * Traverse the grid keeping the probability of detection at a minimum
-     * @param grid to traverse
-     * @param probability function to give the probability of detection for any given point
-     * @param start the starting point in the grid
-     * @param end the ending point in the grid
-     * @return the minimum probability of detection if traversing the room from start to end
+     * 
+     * @param grid        to traverse
+     * @param probability function to give the probability of detection for any
+     *                    given point
+     * @param start       the starting point in the grid
+     * @param end         the ending point in the grid
+     * @return the minimum probability of detection if traversing the room from
+     *         start to end
      */
     public static BigDecimal traverseMinProbability(Grid grid, Function1<Point, BigDecimal> probability, Point start,
             Point end) {
         Stream<Tuple2<Point, BigDecimal>> points = TraversalState.unfold(
-                TraversalState.init(start, grid::adjacents, probability), 
+                TraversalState.init(start, grid::adjacents, probability),
                 grid::adjacents, probability);
         return points
                 .filter(t -> t._1().equals(end))
@@ -85,6 +93,7 @@ public abstract class TraverseRoom {
 
     /**
      * Create a grid from a room
+     * 
      * @param room to generate a grid for
      * @return some form of a grid (StaticGrid in this case)
      */
