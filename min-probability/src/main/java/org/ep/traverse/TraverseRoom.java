@@ -81,9 +81,7 @@ public abstract class TraverseRoom {
      */
     public static BigDecimal traverseMinProbability(Grid grid, Function1<Point, BigDecimal> probability, Point start,
             Point end) {
-        Stream<Tuple2<Point, BigDecimal>> points = TraversalState.unfold(
-                TraversalState.init(start, grid::adjacents, probability),
-                grid::adjacents, probability);
+        final Stream<Tuple2<Point, BigDecimal>> points = TraversalState.unfold(start, grid::adjacents, probability);
         return points
                 .filter(t -> t._1().equals(end))
                 .headOption()

@@ -45,22 +45,25 @@ public final class TraversalState {
      *                    given point
      * @return a stream state that can be unfolded
      */
-    public static TraversalState init(Point startPoint, Function1<Point, List<Point>> adjacents,
-            Function1<Point, BigDecimal> probability) {
+    public static TraversalState init(Point startPoint, BigDecimal probability) {
         return new TraversalState(
                 HashSet.<Point>empty(),
                 PriorityQueue.of((a, b) -> a._2().compareTo(b._2()),
-                        Tuple.of(startPoint, probability.apply(startPoint))),
-                HashMap.of(startPoint, probability.apply(startPoint)));
+                        Tuple.of(startPoint, probability)),
+                HashMap.of(startPoint, probability));
+    }
+
+    public static Stream<Tuple2<Point, BigDecimal>> unfold(final Point start, final Function1<Point, List<Point>> adjacents, final Function1<Point, BigDecimal> probability) {
+        return unfold(TraversalState.init(start, probability.apply(start)), adjacents, probability);
     }
 
     /**
-     * Unfold the current state into a stream of points and probabilities
+     * Unfold the initial state into a stream of points and probabilities
      * 
      * @return a Stream of points and their corresponding minimum probabilities of
      *         detection
      */
-    public static Stream<Tuple2<Point, BigDecimal>> unfold(final TraversalState initial,
+    private static Stream<Tuple2<Point, BigDecimal>> unfold(final TraversalState initial,
             final Function1<Point, List<Point>> adjacents, final Function1<Point, BigDecimal> probability) {
         return Stream.unfoldRight(initial, ss -> {
             Option<Tuple2<Tuple2<Point, BigDecimal>, PriorityQueue<Tuple2<Point, BigDecimal>>>> dequeueOpt = ss.minHeap
