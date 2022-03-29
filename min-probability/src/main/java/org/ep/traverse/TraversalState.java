@@ -45,7 +45,7 @@ public final class TraversalState {
      *                    given point
      * @return a stream state that can be unfolded
      */
-    public static TraversalState init(Point startPoint, BigDecimal probability) {
+    private static TraversalState init(Point startPoint, BigDecimal probability) {
         return new TraversalState(
                 HashSet.<Point>empty(),
                 PriorityQueue.of((a, b) -> a._2().compareTo(b._2()),
