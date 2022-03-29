@@ -33,11 +33,16 @@ public abstract class TraverseRoom {
      * @return the minimum probability of detection for that room
      */
     public static BigDecimal traverseUndetected(Room room) {
+        return traverseUndetected(room, TraverseRoom::formGrid);
+    }
+
+    public static BigDecimal traverseUndetected(Room room, Function1<Room, Grid> formGrid) {
         final BigDecimal middle = room.getLength().divide(newBD(2d), MathContext.DECIMAL64)
                 .setScale(SCALE, ROUNDING_MODE);
         return traverseUndetected(room,
                 new Point(middle, newBD(0d)),
-                new Point(middle, room.getLength()));
+                new Point(middle, room.getLength()),
+                formGrid);
     }
 
     /**
@@ -48,10 +53,14 @@ public abstract class TraverseRoom {
      * @return the minimum probability of detection if traversing the room from start to end
      */
     public static BigDecimal traverseUndetected(Room room, Point start, Point end) {
+        return traverseUndetected(room, start, end, TraverseRoom::formGrid);
+    }
+
+    public static BigDecimal traverseUndetected(Room room, Point start, Point end, Function1<Room, Grid> formGrid) {
         Function3<BigDecimal, Seq<Detector>, Point, BigDecimal> probabilityFunction = TraverseRoom::allDetectorsProbability;
         Function1<Point, BigDecimal> memoizedProbability = probabilityFunction
                 .apply(room.getLength(), room.getDetectors()).memoized();
-        return traverseMinProbability(formGrid(room), memoizedProbability, start, end);
+        return traverseMinProbability(formGrid.apply(room), memoizedProbability, start, end);
     }
 
     /**
