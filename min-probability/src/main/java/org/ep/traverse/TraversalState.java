@@ -28,17 +28,12 @@ public final class TraversalState {
         private final Set<Point> visited;
         private final PriorityQueue<Tuple2<Point, BigDecimal>> minHeap;
         private final Map<Point, BigDecimal> probabilityIdx;
-        private final Function1<Point, List<Point>> adjacents;
-        private final Function1<Point, BigDecimal> probability;
 
         private TraversalState(Set<Point> visited, PriorityQueue<Tuple2<Point, BigDecimal>> minHeap,
-                        Map<Point, BigDecimal> probabilityIdx, Function1<Point, List<Point>> adjacents,
-                        Function1<Point, BigDecimal> probability) {
+                        Map<Point, BigDecimal> probabilityIdx) {
                 this.visited = visited;
                 this.minHeap = minHeap;
                 this.probabilityIdx = probabilityIdx;
-                this.adjacents = adjacents;
-                this.probability = probability;
         }
 
         /**
@@ -56,9 +51,7 @@ public final class TraversalState {
                                 HashSet.<Point>empty(),
                                 PriorityQueue.of((a, b) -> a._2().compareTo(b._2()),
                                                 Tuple.of(startPoint, probability.apply(startPoint))),
-                                HashMap.of(startPoint, probability.apply(startPoint)),
-                                adjacents,
-                                probability);
+                                HashMap.of(startPoint, probability.apply(startPoint)));
         }
 
         /**
@@ -67,8 +60,8 @@ public final class TraversalState {
          * @return a Stream of points and their corresponding minimum probabilities of
          *         detection
          */
-        public Stream<Tuple2<Point, BigDecimal>> unfold() {
-                return Stream.unfoldRight(this, ss -> {
+        public static Stream<Tuple2<Point, BigDecimal>> unfold(final TraversalState initial, final Function1<Point, List<Point>> adjacents, final Function1<Point, BigDecimal> probability) {
+                return Stream.unfoldRight(initial, ss -> {
                         Option<Tuple2<Tuple2<Point, BigDecimal>, PriorityQueue<Tuple2<Point, BigDecimal>>>> dequeueOpt = ss.minHeap
                                         .dequeueOption();
                         if (dequeueOpt.isDefined()) {
@@ -78,11 +71,10 @@ public final class TraversalState {
                                 PriorityQueue<Tuple2<Point, BigDecimal>> tail = headAndTail._2;
                                 Point current = head._1();
                                 BigDecimal currentProb = head._2();
-                                if (visited.contains(current)) {
-                                        return Option .some(Tuple.of(head,
+                                if (ss.visited.contains(current)) {
+                                        return Option.some(Tuple.of(head,
                                                                         new TraversalState(ss.visited, tail,
-                                                                                        ss.probabilityIdx, adjacents,
-                                                                                        probability)));
+                                                                                        ss.probabilityIdx)));
                                 }
                                 Set<Point> nextVisited = ss.visited.add(current);
 
@@ -90,7 +82,7 @@ public final class TraversalState {
                                                 .ofEntries(adjacents.apply(current)
                                                                 .filter(Predicate.not(nextVisited::contains))
                                                                 .map(point -> Tuple.of(point, currentProb
-                                                                                .max(ss.probability.apply(point)))));
+                                                                                .max(probability.apply(point)))));
 
                                 Map<Point, BigDecimal> nextProbabilityIdx = ss.probabilityIdx.merge(adjacentsMap,
                                                 BigDecimal::min);
@@ -102,8 +94,7 @@ public final class TraversalState {
                                 return Option
                                                 .some(Tuple.of(head,
                                                                 new TraversalState(nextVisited, nextMinHeap,
-                                                                                nextProbabilityIdx, adjacents,
-                                                                                probability)));
+                                                                                nextProbabilityIdx)));
                         }
                         return Option.none();
                 });
