@@ -14,6 +14,7 @@ import org.ep.model.Room;
 import org.ep.model.StaticGrid;
 
 import io.vavr.Function1;
+import io.vavr.Function2;
 import io.vavr.Function3;
 import io.vavr.Tuple2;
 import io.vavr.collection.Seq;
@@ -65,23 +66,31 @@ public abstract class TraverseRoom {
         Function3<BigDecimal, Seq<Detector>, Point, BigDecimal> probabilityFunction = TraverseRoom::allDetectorsProbability;
         Function1<Point, BigDecimal> memoizedProbability = probabilityFunction
                 .apply(room.getLength(), room.getDetectors()).memoized();
-        return traverseMinProbability(formGrid.apply(room), memoizedProbability, start, end);
+        Function2<BigDecimal, BigDecimal, BigDecimal> pathProbabilityFunction = TraverseRoom::pathProbability;
+        Function2<BigDecimal, BigDecimal, BigDecimal> memoizedPathProbability = pathProbabilityFunction.memoized();
+        return traverseMinProbability(formGrid.apply(room), memoizedProbability, memoizedPathProbability, start, end);
     }
 
     /**
      * Traverse the grid keeping the probability of detection at a minimum
      * 
-     * @param grid        to traverse
-     * @param probability function to give the probability of detection for any
-     *                    given point
-     * @param start       the starting point in the grid
-     * @param end         the ending point in the grid
+     * @param grid             to traverse
+     * @param pointProbability function to give the probability of detection for any
+     *                         given point
+     * @param pathProbability  function to give the probability of detection for a
+     *                         path
+     * @param start            the starting point in the grid
+     * @param end              the ending point in the grid
      * @return the minimum probability of detection if traversing the room from
      *         start to end
      */
-    public static BigDecimal traverseMinProbability(Grid grid, Function1<Point, BigDecimal> probability, Point start,
-            Point end) {
-        final Stream<Tuple2<Point, BigDecimal>> points = TraversalState.unfold(start, grid::adjacents, probability);
+    public static BigDecimal traverseMinProbability(final Grid grid,
+            final Function1<Point, BigDecimal> pointProbability,
+            final Function2<BigDecimal, BigDecimal, BigDecimal> pathProbability,
+            final Point start,
+            final Point end) {
+        final Stream<Tuple2<Point, BigDecimal>> points = TraversalState.unfold(start, grid::adjacents, pointProbability,
+                pathProbability);
         return points
                 .filter(t -> t._1().equals(end))
                 .headOption()
@@ -150,5 +159,15 @@ public abstract class TraverseRoom {
 
         return newBD(1d).subtract(perDetector.map(p -> newBD(1d).subtract(p))
                 .fold(newBD(1d), (a, b) -> a.multiply(b)));
+    }
+
+    public static BigDecimal pathProbability(final Seq<BigDecimal> detectionProbabilities) {
+        return newBD(1d).subtract(
+                detectionProbabilities.map(p -> newBD(1d).subtract(p))
+                        .fold(newBD(1d), (a, b) -> a.multiply(b)));
+    }
+
+    public static BigDecimal pathProbability(final BigDecimal soFar, final BigDecimal newPointProbability) {
+        return newBD(1d).subtract(newBD(1d).subtract(soFar).multiply(newBD(1d).subtract(newPointProbability)));
     }
 }

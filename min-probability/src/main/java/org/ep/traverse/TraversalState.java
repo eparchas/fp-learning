@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import org.ep.model.Point;
 
 import io.vavr.Function1;
+import io.vavr.Function2;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
@@ -15,6 +16,7 @@ import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.PriorityQueue;
+import io.vavr.collection.Seq;
 import io.vavr.collection.Set;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
@@ -53,8 +55,12 @@ public final class TraversalState {
                 HashMap.of(startPoint, probability));
     }
 
-    public static Stream<Tuple2<Point, BigDecimal>> unfold(final Point start, final Function1<Point, List<Point>> adjacents, final Function1<Point, BigDecimal> probability) {
-        return unfold(TraversalState.init(start, probability.apply(start)), adjacents, probability);
+    public static Stream<Tuple2<Point, BigDecimal>> unfold(final Point start,
+            final Function1<Point, List<Point>> adjacents,
+            final Function1<Point, BigDecimal> pointProbability,
+            final Function2<BigDecimal, BigDecimal, BigDecimal> pathProbability) {
+        return unfold(TraversalState.init(start, pointProbability.apply(start)), adjacents, pointProbability,
+                pathProbability);
     }
 
     /**
@@ -64,12 +70,15 @@ public final class TraversalState {
      *         detection
      */
     private static Stream<Tuple2<Point, BigDecimal>> unfold(final TraversalState initial,
-            final Function1<Point, List<Point>> adjacents, final Function1<Point, BigDecimal> probability) {
+            final Function1<Point, List<Point>> adjacents,
+            final Function1<Point, BigDecimal> pointProbability,
+            final Function2<BigDecimal, BigDecimal, BigDecimal> pathProbability) {
         return Stream.unfoldRight(initial, ss -> {
             Option<Tuple2<Tuple2<Point, BigDecimal>, PriorityQueue<Tuple2<Point, BigDecimal>>>> dequeueOpt = ss.minHeap
                     .dequeueOption();
             if (dequeueOpt.isDefined()) {
-                Tuple2<Tuple2<Point, BigDecimal>, PriorityQueue<Tuple2<Point, BigDecimal>>> headAndTail = dequeueOpt.get();
+                Tuple2<Tuple2<Point, BigDecimal>, PriorityQueue<Tuple2<Point, BigDecimal>>> headAndTail = dequeueOpt
+                        .get();
                 Tuple2<Point, BigDecimal> head = headAndTail._1;
                 PriorityQueue<Tuple2<Point, BigDecimal>> tail = headAndTail._2;
                 Point current = head._1();
@@ -80,11 +89,10 @@ public final class TraversalState {
                 Set<Point> nextVisited = ss.visited.add(current);
 
                 Map<Point, BigDecimal> adjacentsMap = HashMap.ofEntries(
-                    adjacents
-                        .apply(current)
-                        .filter(Predicate.not(nextVisited::contains))
-                        .map(point -> Tuple.of(point, currentProb
-                                        .max(probability.apply(point)))));
+                        adjacents
+                                .apply(current)
+                                .filter(Predicate.not(nextVisited::contains))
+                                .map(point -> Tuple.of(point, pathProbability.apply(currentProb, pointProbability.apply(point)))));
 
                 Map<Point, BigDecimal> nextProbabilityIdx = ss.probabilityIdx.merge(adjacentsMap,
                         BigDecimal::min);
