@@ -16,7 +16,6 @@ import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.PriorityQueue;
-import io.vavr.collection.Seq;
 import io.vavr.collection.Set;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
@@ -91,7 +90,6 @@ public final class TraversalState {
                 Map<Point, BigDecimal> adjacentsMap = HashMap.ofEntries(
                         adjacents
                                 .apply(current)
-                                .filter(Predicate.not(nextVisited::contains))
                                 .map(point -> Tuple.of(point, pathProbability.apply(currentProb, pointProbability.apply(point)))));
 
                 Map<Point, BigDecimal> nextProbabilityIdx = ss.probabilityIdx.merge(adjacentsMap,
