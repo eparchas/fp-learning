@@ -83,17 +83,18 @@ public final class TraversalState {
                 Point current = head._1();
                 BigDecimal currentProb = head._2();
                 if (ss.visited.contains(current)) {
-                    return Option.some(Tuple.of(Tuple.of(current, ss.probabilityIdx.getOrElse(current, newBD(1d))), new TraversalState(ss.visited, tail, ss.probabilityIdx)));
+                    return Option.some(Tuple.of(Tuple.of(current, ss.probabilityIdx.getOrElse(current, newBD(1d))),
+                            new TraversalState(ss.visited, tail, ss.probabilityIdx)));
                 }
                 Set<Point> nextVisited = ss.visited.add(current);
 
                 Map<Point, BigDecimal> adjacentsMap = HashMap.ofEntries(
                         adjacents
                                 .apply(current)
-                                .map(point -> Tuple.of(point, pathProbability.apply(currentProb, pointProbability.apply(point)))));
+                                .map(point -> Tuple.of(point,
+                                        pathProbability.apply(currentProb, pointProbability.apply(point)))));
 
-                Map<Point, BigDecimal> nextProbabilityIdx = ss.probabilityIdx.merge(adjacentsMap,
-                        BigDecimal::min);
+                Map<Point, BigDecimal> nextProbabilityIdx = ss.probabilityIdx.merge(adjacentsMap, BigDecimal::min);
 
                 PriorityQueue<Tuple2<Point, BigDecimal>> nextMinHeap = tail.enqueueAll(
                         adjacentsMap.map(e -> Tuple.of(e._1(),
