@@ -3,7 +3,6 @@ package org.ep.traverse;
 import static org.ep.helper.Util.newBD;
 
 import java.math.BigDecimal;
-import java.util.function.Predicate;
 
 import org.ep.model.Point;
 
@@ -73,11 +72,7 @@ public final class TraversalState {
             final Function1<Point, BigDecimal> pointProbability,
             final Function2<BigDecimal, BigDecimal, BigDecimal> pathProbability) {
         return Stream.unfoldRight(initial, ss -> {
-            Option<Tuple2<Tuple2<Point, BigDecimal>, PriorityQueue<Tuple2<Point, BigDecimal>>>> dequeueOpt = ss.minHeap
-                    .dequeueOption();
-            if (dequeueOpt.isDefined()) {
-                Tuple2<Tuple2<Point, BigDecimal>, PriorityQueue<Tuple2<Point, BigDecimal>>> headAndTail = dequeueOpt
-                        .get();
+            return ss.minHeap.dequeueOption().flatMap(headAndTail -> {
                 Tuple2<Point, BigDecimal> head = headAndTail._1;
                 PriorityQueue<Tuple2<Point, BigDecimal>> tail = headAndTail._2;
                 Point current = head._1();
@@ -100,12 +95,10 @@ public final class TraversalState {
                         adjacentsMap.map(e -> Tuple.of(e._1(),
                                 nextProbabilityIdx.getOrElse(e._1(), newBD(1d)))));
 
-                return Option
-                        .some(Tuple.of(head,
-                                new TraversalState(nextVisited, nextMinHeap,
-                                        nextProbabilityIdx)));
-            }
-            return Option.none();
+                return Option.some(Tuple.of(head,
+                        new TraversalState(nextVisited, nextMinHeap,
+                                nextProbabilityIdx)));
+            });
         });
     }
 }

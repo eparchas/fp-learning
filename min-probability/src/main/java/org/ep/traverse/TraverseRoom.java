@@ -168,6 +168,6 @@ public abstract class TraverseRoom {
     }
 
     public static BigDecimal pathProbability(final BigDecimal soFar, final BigDecimal newPointProbability) {
-        return newBD(1d).subtract(newBD(1d).subtract(soFar).multiply(newBD(1d).subtract(newPointProbability)));
+        return newBD(1d).subtract(newBD(1d).subtract(soFar).multiply(newBD(1d).subtract(newPointProbability)).setScale(SCALE, ROUNDING_MODE));
     }
 }
