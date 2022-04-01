@@ -83,7 +83,7 @@ public final class TraversalState {
                 Point current = head._1();
                 BigDecimal currentProb = head._2();
                 if (ss.visited.contains(current)) {
-                    return Option.some(Tuple.of(head, new TraversalState(ss.visited, tail, ss.probabilityIdx)));
+                    return Option.some(Tuple.of(Tuple.of(current, ss.probabilityIdx.getOrElse(current, newBD(1d))), new TraversalState(ss.visited, tail, ss.probabilityIdx)));
                 }
                 Set<Point> nextVisited = ss.visited.add(current);
 
