@@ -1,9 +1,7 @@
 package org.ep.traverse;
 
-import static org.ep.helper.Util.*;
+import static org.ep.helper.Util.newBD;
 import static org.junit.Assert.assertEquals;
-
-import java.math.BigDecimal;
 
 import org.ep.model.Detector;
 import org.ep.model.Room;

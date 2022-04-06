@@ -3,11 +3,11 @@ package org.ep.traverse;
 import static org.ep.helper.Util.newBD;
 
 import java.math.BigDecimal;
-import java.util.function.Predicate;
 
 import org.ep.model.Point;
 
 import io.vavr.Function1;
+import io.vavr.Function2;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
@@ -25,87 +25,80 @@ import io.vavr.control.Option;
  * detection path
  */
 public final class TraversalState {
-        private final Set<Point> visited;
-        private final PriorityQueue<Tuple2<Point, BigDecimal>> minHeap;
-        private final Map<Point, BigDecimal> probabilityIdx;
-        private final Function1<Point, List<Point>> adjacents;
-        private final Function1<Point, BigDecimal> probability;
+    private final Set<Point> visited;
+    private final PriorityQueue<Tuple2<Point, BigDecimal>> minHeap;
+    private final Map<Point, BigDecimal> probabilityIdx;
 
-        private TraversalState(Set<Point> visited, PriorityQueue<Tuple2<Point, BigDecimal>> minHeap,
-                        Map<Point, BigDecimal> probabilityIdx, Function1<Point, List<Point>> adjacents,
-                        Function1<Point, BigDecimal> probability) {
-                this.visited = visited;
-                this.minHeap = minHeap;
-                this.probabilityIdx = probabilityIdx;
-                this.adjacents = adjacents;
-                this.probability = probability;
-        }
+    private TraversalState(Set<Point> visited, PriorityQueue<Tuple2<Point, BigDecimal>> minHeap,
+            Map<Point, BigDecimal> probabilityIdx) {
+        this.visited = visited;
+        this.minHeap = minHeap;
+        this.probabilityIdx = probabilityIdx;
+    }
 
-        /**
-         * Create a state for a specific point
-         * 
-         * @param startPoint  the starting point of this state
-         * @param adjacents   a function to generate adjacent points to a given point
-         * @param probability a function to calculate the detection probability for a
-         *                    given point
-         * @return a stream state that can be unfolded
-         */
-        public static TraversalState init(Point startPoint, Function1<Point, List<Point>> adjacents,
-                        Function1<Point, BigDecimal> probability) {
-                return new TraversalState(
-                                HashSet.<Point>empty(),
-                                PriorityQueue.of((a, b) -> a._2().compareTo(b._2()),
-                                                Tuple.of(startPoint, probability.apply(startPoint))),
-                                HashMap.of(startPoint, probability.apply(startPoint)),
-                                adjacents,
-                                probability);
-        }
+    /**
+     * Create a state for a specific point
+     * 
+     * @param startPoint  the starting point of this state
+     * @param adjacents   a function to generate adjacent points to a given point
+     * @param probability a function to calculate the detection probability for a
+     *                    given point
+     * @return a stream state that can be unfolded
+     */
+    private static TraversalState init(Point startPoint, BigDecimal probability) {
+        return new TraversalState(
+                HashSet.<Point>empty(),
+                PriorityQueue.of((a, b) -> a._2().compareTo(b._2()),
+                        Tuple.of(startPoint, probability)),
+                HashMap.of(startPoint, probability));
+    }
 
-        /**
-         * Unfold the current state into a stream of points and probabilities
-         * 
-         * @return a Stream of points and their corresponding minimum probabilities of
-         *         detection
-         */
-        public Stream<Tuple2<Point, BigDecimal>> unfold() {
-                return Stream.unfoldRight(this, ss -> {
-                        Option<Tuple2<Tuple2<Point, BigDecimal>, PriorityQueue<Tuple2<Point, BigDecimal>>>> dequeueOpt = ss.minHeap
-                                        .dequeueOption();
-                        if (dequeueOpt.isDefined()) {
-                                Tuple2<Tuple2<Point, BigDecimal>, PriorityQueue<Tuple2<Point, BigDecimal>>> headAndTail = dequeueOpt
-                                                .get();
-                                Tuple2<Point, BigDecimal> head = headAndTail._1;
-                                PriorityQueue<Tuple2<Point, BigDecimal>> tail = headAndTail._2;
-                                Point current = head._1();
-                                BigDecimal currentProb = head._2();
-                                if (visited.contains(current)) {
-                                        return Option .some(Tuple.of(head,
-                                                                        new TraversalState(ss.visited, tail,
-                                                                                        ss.probabilityIdx, adjacents,
-                                                                                        probability)));
-                                }
-                                Set<Point> nextVisited = ss.visited.add(current);
+    public static Stream<Tuple2<Point, BigDecimal>> unfold(final Point start,
+            final Function1<Point, List<Point>> adjacents,
+            final Function1<Point, BigDecimal> pointProbability,
+            final Function2<BigDecimal, BigDecimal, BigDecimal> pathProbability) {
+        return unfold(TraversalState.init(start, pointProbability.apply(start)), adjacents, pointProbability,
+                pathProbability);
+    }
 
-                                Map<Point, BigDecimal> adjacentsMap = HashMap
-                                                .ofEntries(adjacents.apply(current)
-                                                                .filter(Predicate.not(nextVisited::contains))
-                                                                .map(point -> Tuple.of(point, currentProb
-                                                                                .max(ss.probability.apply(point)))));
+    /**
+     * Unfold the initial state into a stream of points and probabilities
+     * 
+     * @return a Stream of points and their corresponding minimum probabilities of
+     *         detection
+     */
+    private static Stream<Tuple2<Point, BigDecimal>> unfold(final TraversalState initial,
+            final Function1<Point, List<Point>> adjacents,
+            final Function1<Point, BigDecimal> pointProbability,
+            final Function2<BigDecimal, BigDecimal, BigDecimal> pathProbability) {
+        return Stream.unfoldRight(initial, ss -> {
+            return ss.minHeap.dequeueOption().flatMap(headAndTail -> {
+                Tuple2<Point, BigDecimal> head = headAndTail._1;
+                PriorityQueue<Tuple2<Point, BigDecimal>> tail = headAndTail._2;
+                Point current = head._1();
+                BigDecimal currentProb = head._2();
+                if (ss.visited.contains(current)) {
+                    return Option.some(Tuple.of(Tuple.of(current, ss.probabilityIdx.getOrElse(current, newBD(1d))),
+                            new TraversalState(ss.visited, tail, ss.probabilityIdx)));
+                }
+                Set<Point> nextVisited = ss.visited.add(current);
 
-                                Map<Point, BigDecimal> nextProbabilityIdx = ss.probabilityIdx.merge(adjacentsMap,
-                                                BigDecimal::min);
+                Map<Point, BigDecimal> adjacentsMap = HashMap.ofEntries(
+                        adjacents
+                                .apply(current)
+                                .map(point -> Tuple.of(point,
+                                        pathProbability.apply(currentProb, pointProbability.apply(point)))));
 
-                                PriorityQueue<Tuple2<Point, BigDecimal>> nextMinHeap = tail.enqueueAll(
-                                                adjacentsMap.map(e -> Tuple.of(e._1(),
-                                                                nextProbabilityIdx.getOrElse(e._1(), newBD(1d)))));
+                Map<Point, BigDecimal> nextProbabilityIdx = ss.probabilityIdx.merge(adjacentsMap, BigDecimal::min);
 
-                                return Option
-                                                .some(Tuple.of(head,
-                                                                new TraversalState(nextVisited, nextMinHeap,
-                                                                                nextProbabilityIdx, adjacents,
-                                                                                probability)));
-                        }
-                        return Option.none();
-                });
-        }
+                PriorityQueue<Tuple2<Point, BigDecimal>> nextMinHeap = tail.enqueueAll(
+                        adjacentsMap.map(e -> Tuple.of(e._1(),
+                                nextProbabilityIdx.getOrElse(e._1(), newBD(1d)))));
+
+                return Option.some(Tuple.of(head,
+                        new TraversalState(nextVisited, nextMinHeap,
+                                nextProbabilityIdx)));
+            });
+        });
+    }
 }
