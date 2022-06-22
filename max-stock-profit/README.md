@@ -6,3 +6,27 @@ You must buy before you can sell the stock, but you can make as many transaction
 For example, given `[1, 3, 2, 8, 4, 10]` and `fee = 2`, you should return `9`, since you could buy the stock at `1` dollar, and sell at `8` dollars, and then buy it at `4` dollars and sell it at `10` dollars. Since we did two transactions, there is a `4` dollar fee, so we have `7 + 6 = 13` profit minus `4` dollars of fees.
 
 # Running instructions
+## Nix
+Make sure you have Nix or NixOS installed
+
+Add support for Nix Flakes or update your existing nix config accordingly.
+
+```
+echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
+```
+
+Run the following to enter the appropriate shell
+```
+nix develop
+```
+
+In the resulting shell you can build and run the code
+```
+stack run "1 3 2 8 4 10" "2"
+9
+```
+
+## Standalone
+```
+stack run "1 3 2 8 4 10" "2"
+```
